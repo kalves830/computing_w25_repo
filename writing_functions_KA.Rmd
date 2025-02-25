@@ -1,0 +1,66 @@
+---
+title: "Writing Functions: heat_index"
+author: Kyle Alves
+format:
+  html:
+    code-fold: show
+    theme: solar
+    embed_resources: true
+    self-contained: true
+    fig-caption: true
+    fig-format: png
+    toc: true
+execute:
+    warning: false
+    message: false
+---
+
+##Load in Libraries
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+```
+
+## Generate sample data
+
+```{r}
+#generate a sequence of temperatures from -50 to 50
+nsample = 100
+temps = rnorm(nsample, mean = 25, sd = 10)
+
+#generate a sequence of relative humidities from 0 to 100
+RH = seq(0, 100, length.out = nsample)
+
+#create data frame to store results 
+results = data.frame(temperature=temps, RH=RH, HI=NA)
+
+#outputs
+results$HI = heat_index(results$temperature, results$RH)
+
+head(results)
+
+```
+
+## Look at results
+
+```{r}
+heat_index_pt_temp <- ggplot(results, aes(x=temperature, y=HI)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Heat Index vs Temperature",
+       x = "Temperature (F)",
+       y = "Heat Index (F)")
+
+heat_index_pt_rh <- ggplot(results, aes(x=RH, y=HI)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "Heat Index vs Relative Humidity",
+       x = "Relative Humidity (%)",
+       y = "Heat Index (F)")
+
+heat_index_pt_temp
+
+heat_index_pt_rh
+```

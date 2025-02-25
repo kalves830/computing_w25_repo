@@ -22,14 +22,14 @@ heat_index <- function(T_air, RH) {
   
   if (any(invalid_temp)) {
     stop("Temperature must be between -100 and 100 degrees Celsius")
-  }
+  } #invald temp message
   
   if (any(invalid_humid)) {
     stop("Relative humidity must be between 0 and 100 percent")
-  }
+  } #invalid humidity message
   
   # Vectorized heat index calculation
-  HI <- T_air + 0.5 * (0.81 * T_air + 46.3 + 0.1 * RH)
+  HI <- T_air + 0.5 * (0.81 * T_air + 46.3 + 0.2 * RH)
   
   return(HI)
 }
