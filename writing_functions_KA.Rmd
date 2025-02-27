@@ -46,6 +46,7 @@ head(results)
 ## Look at results
 
 ```{r}
+# heat index graph
 heat_index_pt_temp <- ggplot(results, aes(x=temperature, y=HI)) +
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +
