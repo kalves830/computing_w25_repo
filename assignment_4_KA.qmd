@@ -1,0 +1,136 @@
+---
+title: "Looping Functions, Assignment #4"
+author: "Kyle Alves"
+format: 
+  html: 
+    code-fold: true
+    embed-resources: true
+    theme: solar
+    toc: true
+    fig-caption: true
+    fig-format: png
+execute:
+  message: false
+  warning: false
+---
+
+# Assignment 4
+
+For this assignment you will write a new Quartro document based on the analysis of power required for different *possible_cars* from looping.RMD; You will
+
+-   Add an additional super light car with mass 5,000 kg and a surface area 10m2
+
+-   Compute the mean and maximum power for Cars A, B, C and for your new car, assuming that average highway speed is 80 km/hr with a standard deviation of 10km/hr; Use 2 different methods to compute the mean and maximum power for each car type; a) **FOR** loop and b) the **pmap** function from **purr**
+
+-   Create two boxplots (one for each method (**FOR** and **pmap**)) that show the range of power consumption (across sampled speeds) for each car type.
+
+Put the Quatro in your assignment github and submit a link on Canvas for Assignment 4 when its ready to be graded
+
+**Grading Rubric**
+
+1.  Correct R code for adding the super light car (5pts)
+2.  Values for mean and maximum power for all 4 cars are in expected ranges (remember you are sampling so values will differ slightly) (5pts)
+3.  Used both methods (**FOR** and **pmap**) correctly (4pts)
+4.  Boxplots (6pts)
+
+<!-- -->
+
+a)  correctly show range of power consumption for each car type for the two methdos
+b)  good presentation (e.g axis labels, colors)
+
+<!-- -->
+
+5.  Good coding practice (e.g Adequate documentation throughout) (5pts)
+
+Total out of 25pts
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+source("R/autopower.R")
+# generate a structure to store info on our possible cars
+
+#Add an additional super light car with mass 5,000 kg and a surface area 10m2
+possible_cars = data.frame(name = c("A","B","C", "splt"),mass=c(10000,65000,38000, 5000), area = c(22,30,22, 10))
+
+
+```
+
+```{r}
+#Compute the mean and maximum power for Cars A, B, C and for your new car, assuming that average highway speed is 80 km/hr with a standard deviation of 10km/hr; Use 2 different methods to compute the mean and maximum power for each car type; 
+
+#make object speeds
+nsample = 200
+mean_speed = 80*0.277
+speeds = rnorm(mean = mean_speed, sd=10*0.277, nsample)
+summary(speeds)
+
+plot(density(speeds), ylab="Distribution of Speeds in (m/s)")
+
+```
+
+```{r}
+
+
+#a) FOR loop 
+powerfor = as.data.frame(matrix(nrow = length(speeds), ncol = nrow(possible_cars)))
+
+#checking powerfor rows and columns
+nrow(possible_cars)
+ncol(powerfor)
+
+#index into matrix
+for (i in 1:ncol(powerfor)) {
+  powerfor[,i] =
+    autopower(A=possible_cars$area[i],
+              m=possible_cars$mass[i],
+              V=speeds)
+}
+
+head(powerfor)
+
+#adding column names
+colnames(powerfor) = possible_cars$name
+
+#pivot_longer for plotting
+powerforlong = powerfor |>
+  pivot_longer(cols = everything(),
+               names_to = "car",
+               values_to = "power")
+
+#Create forloop boxplot
+
+forloopplot = ggplot(powerforlong, aes(car, power, fill = car)) +
+  geom_boxplot() +
+  labs(title = "For Loop Boxplot") +
+  theme_minimal()
+
+forloopplot
+
+```
+
+```{r}
+#Compute the mean and maximum power for Cars A, B, C and for your new car, assuming that average highway speed is 80 km/hr with a standard deviation of 10km/hr
+
+#b) the pmap function from purr
+powerpurr <- pmap(list(A=possible_cars$area, m=possible_cars$mass), autopower, V=speeds)
+
+#add column names
+powerpurr <- as.data.frame(powerfor, col.names=possible_cars$name)
+
+#check
+powerpurr
+
+#pivot to longer rows for plotting
+powerpurrlong <- powerpurr |>
+  pivot_longer(cols = everything(), names_to = "car", values_to = "power")
+
+powerpurrplot <- ggplot(powerpurrlong, aes(car, power, fill = car)) +
+  geom_boxplot() +
+  labs(title = "PMAP of Power Purr Function") +
+  theme_minimal()
+
+powerpurrplot
+```
